@@ -7,7 +7,7 @@ export class Logger {
   }
 
   static log(message: string, ...args: any[]): void {
-    console.warn(this.formatMessage(message), ...args);
+    console.log(this.formatMessage(message), ...args);
   }
 
   static warn(message: string, ...args: any[]): void {
@@ -19,7 +19,7 @@ export class Logger {
   }
 
   static debug(message: string, ...args: any[]): void {
-    console.warn(this.formatMessage(message), ...args);
+    console.debug(this.formatMessage(message), ...args);
   }
 
   static toolInvocation(toolName: string, args: any): void {
