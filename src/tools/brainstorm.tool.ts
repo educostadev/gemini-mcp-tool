@@ -126,7 +126,9 @@ const brainstormArgsSchema = z.object({
   includeAnalysis: z.boolean().default(true).describe("Include feasibility, impact, and implementation analysis for generated ideas"),
 });
 
-export const brainstormTool: UnifiedTool = {
+type BrainstormArgs = z.infer<typeof brainstormArgsSchema>;
+
+export const brainstormTool: UnifiedTool<BrainstormArgs> = {
   name: "brainstorm",
   description: "Generate novel ideas with dynamic context gathering. --> Creative frameworks (SCAMPER, Design Thinking, etc.), domain context integration, idea clustering, feasibility analysis, and iterative refinement.",
   zodSchema: brainstormArgsSchema,
@@ -134,7 +136,7 @@ export const brainstormTool: UnifiedTool = {
     description: "Generate structured brainstorming prompt with methodology-driven ideation, domain context integration, and analytical evaluation framework",
   },
   category: 'gemini',
-  execute: async (args, onProgress) => {
+  execute: async (args: BrainstormArgs, onProgress) => {
     const {
       prompt,
       model,
@@ -151,21 +153,21 @@ export const brainstormTool: UnifiedTool = {
     }
 
     let enhancedPrompt = buildBrainstormPrompt({
-      prompt: prompt.trim() as string,
-      methodology: methodology as string,
-      domain: domain as string | undefined,
-      constraints: constraints as string | undefined,
-      existingContext: existingContext as string | undefined,
-      ideaCount: ideaCount as number,
-      includeAnalysis: includeAnalysis as boolean
+      prompt: prompt.trim(),
+      methodology,
+      domain,
+      constraints,
+      existingContext,
+      ideaCount,
+      includeAnalysis
     });
 
     Logger.debug(`Brainstorm: Using methodology '${methodology}' for domain '${domain || 'general'}'`);
     
     // Report progress to user
     onProgress?.(`Generating ${ideaCount} ideas via ${methodology} methodology...`);
-    
+
     // Execute with Gemini
-    return await executeGeminiCLI(enhancedPrompt, model as string | undefined, false, false, onProgress);
+    return await executeGeminiCLI(enhancedPrompt, model, false, false, onProgress);
   }
 };

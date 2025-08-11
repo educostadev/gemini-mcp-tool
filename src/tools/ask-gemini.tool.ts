@@ -15,7 +15,9 @@ const askGeminiArgsSchema = z.object({
   chunkCacheKey: z.string().optional().describe("Optional cache key for continuation"),
 });
 
-export const askGeminiTool: UnifiedTool = {
+type AskGeminiArgs = z.infer<typeof askGeminiArgsSchema>;
+
+export const askGeminiTool: UnifiedTool<AskGeminiArgs> = {
   name: "ask-gemini",
   description: "model selection [-m], sandbox [-s], and changeMode:boolean for providing edits",
   zodSchema: askGeminiArgsSchema,
@@ -23,21 +25,24 @@ export const askGeminiTool: UnifiedTool = {
     description: "Execute 'gemini -p <prompt>' to get Gemini AI's response. Supports enhanced change mode for structured edit suggestions.",
   },
   category: 'gemini',
-  execute: async (args, onProgress) => {
-    const { prompt, model, sandbox, changeMode, chunkIndex, chunkCacheKey } = args; if (!prompt?.trim()) { throw new Error(ERROR_MESSAGES.NO_PROMPT_PROVIDED); }
+  execute: async (args: AskGeminiArgs, onProgress) => {
+    const { prompt, model, sandbox, changeMode, chunkIndex, chunkCacheKey } = args;
+    if (!prompt?.trim()) {
+      throw new Error(ERROR_MESSAGES.NO_PROMPT_PROVIDED);
+    }
   
     if (changeMode && chunkIndex && chunkCacheKey) {
       return processChangeModeOutput(
         '', // empty for cache...
         chunkIndex as number,
         chunkCacheKey as string,
-        prompt as string
+        prompt
       );
     }
-    
+
     const result = await executeGeminiCLI(
-      prompt as string,
-      model as string | undefined,
+      prompt,
+      model,
       !!sandbox,
       !!changeMode,
       onProgress
@@ -46,9 +51,9 @@ export const askGeminiTool: UnifiedTool = {
     if (changeMode) {
       return processChangeModeOutput(
         result,
-        args.chunkIndex as number | undefined,
+        chunkIndex as number | undefined,
         undefined,
-        prompt as string
+        prompt
       );
     }
     return `${STATUS_MESSAGES.GEMINI_RESPONSE}\n${result}`; // changeMode false

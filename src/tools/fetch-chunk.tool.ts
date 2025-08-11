@@ -9,7 +9,9 @@ const inputSchema = z.object({
   chunkIndex: z.number().min(1).describe("Which chunk to retrieve (1-based index)")
 });
 
-export const fetchChunkTool: UnifiedTool = {
+type FetchChunkArgs = z.infer<typeof inputSchema>;
+
+export const fetchChunkTool: UnifiedTool<FetchChunkArgs> = {
   name: 'fetch-chunk',
   description: 'Retrieves cached chunks from a changeMode response. Use this to get subsequent chunks after receiving a partial changeMode response.',
   
@@ -28,7 +30,7 @@ export const fetchChunkTool: UnifiedTool = {
   
   category: 'utility',
   
-  execute: async (args: any, onProgress?: (newOutput: string) => void): Promise<string> => {
+  execute: async (args: FetchChunkArgs, onProgress?: (newOutput: string) => void): Promise<string> => {
     const { cacheKey, chunkIndex } = args;
     
     Logger.toolInvocation('fetch-chunk', args);
