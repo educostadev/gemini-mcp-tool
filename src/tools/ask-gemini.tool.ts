@@ -34,8 +34,8 @@ export const askGeminiTool: UnifiedTool<AskGeminiArgs> = {
     if (changeMode && chunkIndex && chunkCacheKey) {
       return processChangeModeOutput(
         '', // empty for cache...
-        chunkIndex as number,
-        chunkCacheKey as string,
+        Number(chunkIndex),
+        chunkCacheKey,
         prompt
       );
     }
