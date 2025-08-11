@@ -8,10 +8,10 @@ describe('Logger', () => {
   });
 
   it.each([
-    { level: 'log', message: 'hello', args: ['world'], expectedMsg: `${LOG_PREFIX} hello\n` },
-    { level: 'warn', message: 'warning', args: [], expectedMsg: `${LOG_PREFIX} warning\n` },
-    { level: 'error', message: 'problem', args: [], expectedMsg: `${LOG_PREFIX} problem\n` },
-    { level: 'debug', message: 'details', args: [], expectedMsg: `${LOG_PREFIX} details\n` },
+    { level: 'log', message: 'hello', args: ['world'], expectedMsg: `${LOG_PREFIX} hello` },
+    { level: 'warn', message: 'warning', args: [], expectedMsg: `${LOG_PREFIX} warning` },
+    { level: 'error', message: 'problem', args: [], expectedMsg: `${LOG_PREFIX} problem` },
+    { level: 'debug', message: 'details', args: [], expectedMsg: `${LOG_PREFIX} details` },
   ])('uses console.%s for %s', ({ level, message, args, expectedMsg }) => {
     const spy = vi
       .spyOn(console, level as keyof Console)
