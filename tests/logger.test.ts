@@ -7,27 +7,19 @@ describe('Logger', () => {
     vi.restoreAllMocks();
   });
 
-  it('uses console.log for log', () => {
-    const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    Logger.log('hello', 'world');
-    expect(spy).toHaveBeenCalledWith(`${LOG_PREFIX} hello\n`, 'world');
-  });
-
-  it('uses console.warn for warn', () => {
-    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    Logger.warn('warning');
-    expect(spy).toHaveBeenCalledWith(`${LOG_PREFIX} warning\n`);
-  });
-
-  it('uses console.error for error', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    Logger.error('problem');
-    expect(spy).toHaveBeenCalledWith(`${LOG_PREFIX} problem\n`);
-  });
-
-  it('uses console.debug for debug', () => {
-    const spy = vi.spyOn(console, 'debug').mockImplementation(() => {});
-    Logger.debug('details');
-    expect(spy).toHaveBeenCalledWith(`${LOG_PREFIX} details\n`);
+  it.each([
+    { level: 'log', message: 'hello', args: ['world'], expectedMsg: `${LOG_PREFIX} hello\n` },
+    { level: 'warn', message: 'warning', args: [], expectedMsg: `${LOG_PREFIX} warning\n` },
+    { level: 'error', message: 'problem', args: [], expectedMsg: `${LOG_PREFIX} problem\n` },
+    { level: 'debug', message: 'details', args: [], expectedMsg: `${LOG_PREFIX} details\n` },
+  ])('uses console.%s for %s', ({ level, message, args, expectedMsg }) => {
+    const spy = vi
+      .spyOn(console, level as keyof Console)
+      .mockImplementation(() => {});
+    (Logger[level as keyof typeof Logger] as (...args: any[]) => void)(
+      message,
+      ...args,
+    );
+    expect(spy).toHaveBeenCalledWith(expectedMsg, ...args);
   });
 });
