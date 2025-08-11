@@ -2,7 +2,7 @@ import { LOG_PREFIX } from "../constants.js";
 
 export class Logger {
   private static formatMessage(message: string): string {
-    return `${LOG_PREFIX} ${message}` + "\n";
+    return `${LOG_PREFIX} ${message}`;
   }
 
   static log(message: string, ...args: any[]): void {
