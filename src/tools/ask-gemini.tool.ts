@@ -51,7 +51,7 @@ export const askGeminiTool: UnifiedTool<AskGeminiArgs> = {
     if (changeMode) {
       return processChangeModeOutput(
         result,
-        chunkIndex as number | undefined,
+        chunkIndex !== undefined ? Number(chunkIndex) : undefined,
         undefined,
         prompt
       );
