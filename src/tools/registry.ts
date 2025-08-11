@@ -4,7 +4,7 @@ import { ToolArguments } from "../constants.js";
 import { ZodTypeAny, ZodError } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
-export interface UnifiedTool {
+export interface UnifiedTool<TArgs extends ToolArguments = ToolArguments> {
   name: string;
   description: string;
   zodSchema: ZodTypeAny;
@@ -19,13 +19,13 @@ export interface UnifiedTool {
   };
 
   execute: (
-    args: ToolArguments,
+    args: TArgs,
     onProgress?: (newOutput: string) => void,
   ) => Promise<string>;
   category?: "simple" | "gemini" | "utility";
 }
 
-export const toolRegistry: UnifiedTool[] = [];
+export const toolRegistry: UnifiedTool<any>[] = [];
 export function toolExists(toolName: string): boolean {
   return toolRegistry.some((t) => t.name === toolName);
 }
@@ -74,17 +74,19 @@ export function getPromptDefinitions(): Prompt[] {
     }));
 }
 
-export async function executeTool(
+export async function executeTool<TArgs extends ToolArguments>(
   toolName: string,
-  args: ToolArguments,
+  args: TArgs,
   onProgress?: (newOutput: string) => void,
 ): Promise<string> {
-  const tool = toolRegistry.find((t) => t.name === toolName);
+  const tool = toolRegistry.find((t) => t.name === toolName) as
+    | UnifiedTool<TArgs>
+    | undefined;
   if (!tool) {
     throw new Error(`Unknown tool: ${toolName}`);
   }
   try {
-    const validatedArgs = tool.zodSchema.parse(args);
+    const validatedArgs = tool.zodSchema.parse(args) as TArgs;
     return tool.execute(validatedArgs, onProgress);
   } catch (error) {
     if (error instanceof ZodError) {

@@ -6,7 +6,9 @@ const pingArgsSchema = z.object({
   prompt: z.string().default("").describe("Message to echo "),
 });
 
-export const pingTool: UnifiedTool = {
+type PingArgs = z.infer<typeof pingArgsSchema>;
+
+export const pingTool: UnifiedTool<PingArgs> = {
   name: "ping",
   description: "Echo",
   zodSchema: pingArgsSchema,
@@ -14,15 +16,17 @@ export const pingTool: UnifiedTool = {
     description: "Echo test message with structured response.",
   },
   category: "simple",
-  execute: async (args, onProgress) => {
-    const message = args.prompt || args.message || "Pong!";
-    return executeCommand("echo", [message as string], onProgress);
+  execute: async (args: PingArgs, onProgress) => {
+    const message = args.prompt || "Pong!";
+    return executeCommand("echo", [message], onProgress);
   },
 };
 
 const helpArgsSchema = z.object({});
 
-export const helpTool: UnifiedTool = {
+type HelpArgs = z.infer<typeof helpArgsSchema>;
+
+export const helpTool: UnifiedTool<HelpArgs> = {
   name: "Help",
   description: "receive help information",
   zodSchema: helpArgsSchema,
@@ -30,7 +34,7 @@ export const helpTool: UnifiedTool = {
     description: "receive help information",
   },
   category: "simple",
-  execute: async (args, onProgress) => {
+  execute: async (_args: HelpArgs, onProgress) => {
     return executeCommand("gemini", ["-help"], onProgress);
   },
 };

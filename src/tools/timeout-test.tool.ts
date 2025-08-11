@@ -8,7 +8,9 @@ const timeoutTestArgsSchema = z.object({
     .describe("Duration in milliseconds (minimum 10ms)"),
 });
 
-export const timeoutTestTool: UnifiedTool = {
+type TimeoutTestArgs = z.infer<typeof timeoutTestArgsSchema>;
+
+export const timeoutTestTool: UnifiedTool<TimeoutTestArgs> = {
   name: "timeout-test",
   description: "Test timeout prevention by running for a specified duration",
   zodSchema: timeoutTestArgsSchema,
@@ -17,8 +19,8 @@ export const timeoutTestTool: UnifiedTool = {
       "Test the timeout prevention system by running a long operation",
   },
   category: "simple",
-  execute: async (args, onProgress) => {
-    const duration = args.duration as number;
+  execute: async (args: TimeoutTestArgs, onProgress) => {
+    const { duration } = args;
     const steps = Math.ceil(duration / 5000); // Progress every 5 seconds
     const stepDuration = duration / steps;
     const startTime = Date.now();
