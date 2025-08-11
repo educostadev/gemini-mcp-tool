@@ -4,11 +4,11 @@ import { ToolArguments } from "../constants.js";
 import { ZodTypeAny, ZodError } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
-export interface UnifiedTool {
+export interface UnifiedTool<TArgs extends ToolArguments = ToolArguments> {
   name: string;
   description: string;
   zodSchema: ZodTypeAny;
-  
+
   prompt?: {
     description: string;
     arguments?: Array<{
@@ -17,12 +17,12 @@ export interface UnifiedTool {
       required: boolean;
     }>;
   };
-  
-  execute: (args: ToolArguments, onProgress?: (newOutput: string) => void) => Promise<string>;
+
+  execute: (args: TArgs, onProgress?: (newOutput: string) => void) => Promise<string>;
   category?: 'simple' | 'gemini' | 'utility';
 }
 
-export const toolRegistry: UnifiedTool[] = [];
+export const toolRegistry: UnifiedTool<any>[] = [];
 export function toolExists(toolName: string): boolean {
   return toolRegistry.some(t => t.name === toolName);
 }
@@ -66,11 +66,20 @@ export function getPromptDefinitions(): Prompt[] { // Helper to get MCP Prompt d
     }));
 }
 
-export async function executeTool(toolName: string, args: ToolArguments, onProgress?: (newOutput: string) => void): Promise<string> {
-  const tool = toolRegistry.find(t => t.name === toolName);
-  if (!tool) { throw new Error(`Unknown tool: ${toolName}`); } try { const validatedArgs = tool.zodSchema.parse(args);
+export async function executeTool<TArgs extends ToolArguments>(
+  toolName: string,
+  args: TArgs,
+  onProgress?: (newOutput: string) => void
+): Promise<string> {
+  const tool = toolRegistry.find(t => t.name === toolName) as UnifiedTool<TArgs> | undefined;
+  if (!tool) {
+    throw new Error(`Unknown tool: ${toolName}`);
+  }
+  try {
+    const validatedArgs = tool.zodSchema.parse(args) as TArgs;
     return tool.execute(validatedArgs, onProgress);
-  } catch (error) { if (error instanceof ZodError) {
+  } catch (error) {
+    if (error instanceof ZodError) {
       const issues = error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ');
       throw new Error(`Invalid arguments for ${toolName}: ${issues}`);
     }
