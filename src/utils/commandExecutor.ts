@@ -4,7 +4,7 @@ import { Logger } from "./logger.js";
 export async function executeCommand(
   command: string,
   args: string[],
-  onProgress?: (newOutput: string) => void
+  onProgress?: (newOutput: string) => void,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
@@ -22,10 +22,10 @@ export async function executeCommand(
     let stderr = "";
     let isResolved = false;
     let lastReportedLength = 0;
-    
+
     childProcess.stdout.on("data", (data) => {
       stdout += data.toString();
-      
+
       // Report new content if callback provided
       if (onProgress && stdout.length > lastReportedLength) {
         const newContent = stdout.substring(lastReportedLength);
@@ -34,13 +34,14 @@ export async function executeCommand(
       }
     });
 
-
     // CLI level errors
     childProcess.stderr.on("data", (data) => {
       stderr += data.toString();
       // find RESOURCE_EXHAUSTED when gemini-2.5-pro quota is exceeded
       if (stderr.includes("RESOURCE_EXHAUSTED")) {
-        const modelMatch = stderr.match(/Quota exceeded for quota metric '([^']+)'/);
+        const modelMatch = stderr.match(
+          /Quota exceeded for quota metric '([^']+)'/,
+        );
         const statusMatch = stderr.match(/status["\s]*[:=]\s*(\d+)/);
         const reasonMatch = stderr.match(/"reason":\s*"([^"]+)"/);
         const model = modelMatch ? modelMatch[1] : "Unknown Model";
@@ -53,11 +54,14 @@ export async function executeCommand(
             details: {
               model: model,
               reason: reason,
-              statusText: "Too Many Requests -- > try using gemini-2.5-flash by asking",
-            }
-          }
+              statusText:
+                "Too Many Requests -- > try using gemini-2.5-flash by asking",
+            },
+          },
         };
-        Logger.error(`Gemini Quota Error: ${JSON.stringify(errorJson, null, 2)}`);
+        Logger.error(
+          `Gemini Quota Error: ${JSON.stringify(errorJson, null, 2)}`,
+        );
       }
     });
     childProcess.on("error", (error) => {
