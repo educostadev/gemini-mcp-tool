@@ -16,7 +16,7 @@ export const timeoutTestTool: UnifiedTool<TimeoutTestArgs> = {
   },
   category: 'simple',
   execute: async (args: TimeoutTestArgs, onProgress) => {
-    const duration = args.duration;
+    const {duration} = args;
     const steps = Math.ceil(duration / 5000); // Progress every 5 seconds
     const stepDuration = duration / steps;
     const startTime = Date.now();
