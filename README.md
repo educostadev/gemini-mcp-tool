@@ -1,4 +1,6 @@
 
+# Please See this PR [fix: resolve MCP Inspector JSON-RPC communication errors](https://github.com/alexx-ftw/gemini-mcp-tool/pull/24)
+
 # Gemini MCP Tool
 
 <div align="center">
