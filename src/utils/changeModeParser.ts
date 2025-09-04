@@ -1,3 +1,5 @@
+import { Logger } from "./logger.js";
+
 export interface ChangeModeEdit {
   filename: string;
   oldStartLine: number;
@@ -59,7 +61,7 @@ export function parseChangeModeOutput(
       ] = match;
 
       if (oldFilename !== newFilename) {
-        console.warn(
+        Logger.warn(
           `[changeModeParser] Filename mismatch: ${oldFilename} vs ${newFilename}`,
         );
         continue;

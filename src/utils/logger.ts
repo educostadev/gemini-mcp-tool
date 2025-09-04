@@ -5,24 +5,39 @@ export class Logger {
     return `${LOG_PREFIX} ${message}`;
   }
 
+  // Always redirect logging to stderr to avoid corrupting JSON-RPC on stdout
+  // This is safer for MCP servers than trying to detect the mode
+  private static writeToStderr(message: string, ...args: any[]): void {
+    const fullMessage = this.formatMessage(message) + 
+      (args.length > 0 ? ' ' + args.map(arg => 
+        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+      ).join(' ') : '');
+    process.stderr.write(fullMessage + '\n');
+  }
+
   static log(message: string, ...args: any[]): void {
-    console.log(this.formatMessage(message), ...args);
+    // Always use stderr to avoid corrupting stdout JSON-RPC
+    this.writeToStderr(message, ...args);
   }
 
   static warn(message: string, ...args: any[]): void {
-    console.warn(this.formatMessage(message), ...args);
+    // Always use stderr to avoid corrupting stdout JSON-RPC
+    this.writeToStderr(message, ...args);
   }
 
   static error(message: string, ...args: any[]): void {
-    console.error(this.formatMessage(message), ...args);
+    // Always use stderr to avoid corrupting stdout JSON-RPC
+    this.writeToStderr(message, ...args);
   }
 
   static debug(message: string, ...args: any[]): void {
-    console.debug(this.formatMessage(message), ...args);
+    // Always use stderr to avoid corrupting stdout JSON-RPC
+    this.writeToStderr(message, ...args);
   }
 
   static toolInvocation(toolName: string, args: any): void {
-    this.warn("Raw:", JSON.stringify(args, null, 2));
+    // Always use stderr to avoid corrupting stdout JSON-RPC
+    this.writeToStderr("Raw:", JSON.stringify(args, null, 2));
   }
 
   static toolParsedArgs(
@@ -31,7 +46,8 @@ export class Logger {
     sandbox?: boolean,
     changeMode?: boolean,
   ): void {
-    this.warn(`Parsed prompt: "${prompt}"\nchangeMode: ${changeMode || false}`);
+    // Always use stderr to avoid corrupting stdout JSON-RPC
+    this.writeToStderr(`Parsed prompt: "${prompt}"\nchangeMode: ${changeMode || false}`);
   }
 
   static commandExecution(
@@ -39,7 +55,8 @@ export class Logger {
     args: string[],
     startTime: number,
   ): void {
-    this.warn(
+    // Always use stderr to avoid corrupting stdout JSON-RPC
+    this.writeToStderr(
       `[${startTime}] Starting: ${command} ${args.map((arg) => `"${arg}"`).join(" ")}`,
     );
 
@@ -58,10 +75,11 @@ export class Logger {
     exitCode: number | null,
     outputLength?: number,
   ): void {
+    // Always use stderr to avoid corrupting stdout JSON-RPC
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-    this.warn(`[${elapsed}s] Process finished with exit code: ${exitCode}`);
+    this.writeToStderr(`[${elapsed}s] Process finished with exit code: ${exitCode}`);
     if (outputLength !== undefined) {
-      this.warn(`Response: ${outputLength} chars`);
+      this.writeToStderr(`Response: ${outputLength} chars`);
     }
 
     // Clean up command tracking
